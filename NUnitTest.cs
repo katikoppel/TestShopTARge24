@@ -11,6 +11,9 @@ namespace ShopTARge24Testing
             InsertSpaceshipData();
             UpdateSpaceshipData();
             ViewSpaceshipData();
+            DeleteSpaceshipData();
+            CreateSpaceship_WithWrongData();
+            UpdateSpaceship_WithWrongData();
         }
 
         private static void InsertSpaceshipData()
@@ -66,15 +69,16 @@ namespace ShopTARge24Testing
             }
 
             IWebElement idOfTestNameDetails = driver.FindElement(By.Id("testIdNameDetails"));
-            var nameindetails = idOfTestNameDetails.Text;
+            var nameInDetails = idOfTestNameDetails.Text;
 
             IWebElement idOfTestClassificationDetails = driver.FindElement(By.Id("testIdClassificationDetails"));
-            var classificationindetails = idOfTestClassificationDetails.Text;
+            var classificationInDetails = idOfTestClassificationDetails.Text;
 
-            Assert.That(nameindetails.Contains("SpaceshipOne"));
-            Assert.That(classificationindetails.Contains("BigOne"));
+            Assert.That(nameInDetails.Contains("SpaceshipOne"));
+            Assert.That(classificationInDetails.Contains("BigOne"));
 
-            Console.WriteLine("Test passed");
+            IWebElement idOfBack = driver.FindElement(By.Id("testIdIndexDetails"));
+            idOfBack.Click();
         }
 
         private static void UpdateSpaceshipData()
@@ -119,6 +123,92 @@ namespace ShopTARge24Testing
             idOfUpdate.Click();
 
             Thread.Sleep(1000);
+        }
+
+        private static void DeleteSpaceshipData()
+        {
+            IWebDriver driver = new FirefoxDriver();
+            driver.Url = "https://localhost:7282/";
+
+            IWebElement idOfSpaceshipLink = driver.FindElement(By.Id("spaceship"));
+            idOfSpaceshipLink.Click();
+
+            var rows = driver.FindElements(By.CssSelector("table tr"));
+
+            foreach (var row in rows)
+            {
+                if (row.Text.Contains("SpaceshipTWO"))
+                {
+                    row.FindElement(By.LinkText("Delete")).Click();
+                    break;
+                }
+            }
+
+            IWebElement deleteButton = driver.FindElement(By.Id("testIdDelete"));
+            deleteButton.Click();
+
+            Thread.Sleep(1000);
+        }
+        private static void CreateSpaceship_WithWrongData()
+        {
+            IWebDriver driver = new FirefoxDriver();
+            driver.Url = "https://localhost:7282/";
+
+            driver.FindElement(By.Id("spaceship")).Click();
+            driver.FindElement(By.Id("testIdCreate")).Click();
+
+            driver.FindElement(By.Id("testIdNameCU")).SendKeys("asd");
+            driver.FindElement(By.Id("testIdClassificationCU")).SendKeys("asd");
+            driver.FindElement(By.Id("testIdBuiltDateCU")).SendKeys("11/16/2025 11:11 AM");
+
+            IWebElement crew = driver.FindElement(By.Id("testIdCrewCU"));
+            crew.SendKeys("big");
+
+            IWebElement enginePower = driver.FindElement(By.Id("testIdEnginePowerCU"));
+            enginePower.SendKeys("123");
+
+            driver.FindElement(By.Id("testIdCreateCU")).Click();
+
+            Assert.That(driver.Url.Contains("create"));
+
+            Console.WriteLine("Creating a new spaceship was blocked because of wrong data type in Crew field.");
+        }
+
+        private static void UpdateSpaceship_WithWrongData()
+        {
+            IWebDriver driver = new FirefoxDriver();
+            driver.Url = "https://localhost:7282/";
+
+            driver.FindElement(By.Id("spaceship")).Click();
+
+            var rows = driver.FindElements(By.CssSelector("table tr"));
+
+            foreach (var row in rows)
+            {
+                if (row.Text.Contains("SpaceshipTWO"))
+                {
+                    row.FindElement(By.LinkText("Update")).Click();
+                    break;
+                }
+            }
+
+            IWebElement name = driver.FindElement(By.Id("testIdNameCU"));
+            name.Clear();
+            name.SendKeys("SomeShip");
+
+            IWebElement classification = driver.FindElement(By.Id("testIdClassificationCU"));
+            classification.Clear();
+            classification.SendKeys("SmallShip");
+
+            IWebElement crew = driver.FindElement(By.Id("testIdCrewCU"));
+            crew.Clear();
+            crew.SendKeys("small");
+
+            driver.FindElement(By.Id("testIdUpdateCU")).Click();
+
+            Assert.That(driver.Url.Contains("update"));
+
+            Console.WriteLine("Updating spaceship was blocked because of wrong data type in Crew field.");
         }
     }
 }
